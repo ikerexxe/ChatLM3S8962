@@ -33,7 +33,10 @@
 ** PROTOTYPES OF GLOBAL FUNCTIONS											**
 ** 																			**
 ******************************************************************************/
-
+void CHAT_inicializacion_comunicacion();
+void CHAT_ciere_comunicacion();
+void CHAT_enviar(unsigned char *);
+void CHAT_recibir();
 
 /*****************************************************************************
 **	 																		**

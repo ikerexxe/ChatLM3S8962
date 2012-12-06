@@ -32,6 +32,7 @@
 #include "displayGenerico.h"
 #include "display.h"
 #include "sonido.h"
+#include "comunicacion.h"
 
 /*********************************************************************
 ** 																	**
@@ -83,7 +84,8 @@ void CHAT_inicializacion(){
 	CHAT_inicializacion_clock();
 	CHAT_inicializacion_keypad();
 	CHAT_inicializacion_display();
-	CHAT_inicializacion_pwm();
+	//CHAT_inicializacion_pwm();
+	CHAT_inicializacion_comunicacion();
 }
 
 /**
@@ -97,7 +99,7 @@ void CHAT_inicializacion(){
 */
 //TODO: falta la explicarla bien
 void CHAT_logica(){
-
+	//CHAT_enviar("prueba");
 }
 /*********************************************************************
 ** 																	**

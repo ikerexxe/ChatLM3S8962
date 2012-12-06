@@ -104,6 +104,7 @@ extern int main(void);           /*!< The entry point for the application.    */
 extern void SystemInit(void);    /*!< Setup the microcontroller system(CMSIS) */
 void Default_Reset_Handler(void);   /*!< Default reset handler                */
 static void Default_Handler(void);  /*!< Default exception handler            */
+extern void  __attribute__((interrupt)) UART0IntHandler(void);
 
 
 /**
@@ -135,7 +136,7 @@ void (* const g_pfnVectors[])(void) =
   GPIOPortC_IRQHandler,                /*!<  2: GPIO Port C                   */
   GPIOPortD_IRQHandler,                /*!<  3: GPIO Port D                   */
   GPIOPortE_IRQHandler,                /*!<  4: GPIO Port E                   */ 
-  UART0_IRQHandler,                    /*!<  5: UART0 Rx and Tx               */
+  UART0IntHandler,                    /*!<  5: UART0 Rx and Tx               */
   UART1_IRQHandler,                    /*!<  6: UART1 Rx and Tx               */
   SSI0_IRQHandler,                     /*!<  7: SSI0 Rx and Tx                */
   I2C0_IRQHandler,                     /*!<  8: I2C0 Master and Slave         */

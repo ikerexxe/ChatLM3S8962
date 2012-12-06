@@ -88,10 +88,8 @@ void CHAT_inicializacion_display(){
 
 	FRAME_BUFFER_init();
 	char *str;
-	str="do re mi fa sol";
-	FRAME_BUFFER_insert_text(str, 15, 8); //Escribimos en el buffer
 	str="----------------";
-	FRAME_BUFFER_insert_text(str, 13, 15); //Escribimos en el buffer
+	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
 	FRAME_BUFFER_write_to_display(); //Volcamos el buffer en la pantalla
 }
 /**
