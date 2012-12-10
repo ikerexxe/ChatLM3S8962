@@ -31,11 +31,20 @@
 
 /*********************************************************************
 ** 																	**
+** DEFINITIONS AND MACROS 											**
+** 																	**
+**********************************************************************/
+#define MAX_RECIBIDOS 10
+
+/*********************************************************************
+** 																	**
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
 int puerto = 0;
 int y = 15;
+unsigned char * datosRecibidos;
+int contRecibidos = 0;
 
 /*********************************************************************
 ** 																	**
@@ -52,6 +61,7 @@ int y = 15;
 //TODO: faltan las explicaciones
 void CHAT_inicializacion_comunicacion(){
 	openUART(puerto);
+	datosRecibidos = malloc(sizeof(unsigned char)*MAX_RECIBIDOS);
 }
 
 void CHAT_ciere_comunicacion(){
@@ -67,14 +77,28 @@ void CHAT_enviar(unsigned char * datos){
 }
 
 void CHAT_recibir(){
-	unsigned char * datos;
+	int contTemporal = 0;
+	unsigned char * temporal;
 
 	//TODO: a revisar el parametro de entrada
-	datos = getSwFIFO(puerto);
-	//TODO: a revisar x e y
-	FRAME_BUFFER_insert_text(datos,0,y);
-	y+=10;
-	FRAME_BUFFER_write_to_display();
+	temporal = getSwFIFO(puerto);
+
+	while(temporal[contTemporal]!='\0'){
+		//TODO: a revisar x e y
+		if(temporal[contTemporal] == 36){
+			datosRecibidos[contRecibidos] = '\0';
+			FRAME_BUFFER_insert_text(datosRecibidos,0,y);
+			y+=10;
+			FRAME_BUFFER_write_to_display();
+			contTemporal = 0;
+			contRecibidos = 0;
+		} else{
+			datosRecibidos[contRecibidos] = temporal[contTemporal];
+			contRecibidos++;
+		}
+
+		contTemporal++;
+	}
 }
 /*********************************************************************
 ** 																	**

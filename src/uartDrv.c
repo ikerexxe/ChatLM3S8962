@@ -117,23 +117,22 @@ static void fromHwFIFO(int nPort)
 		i++;
 		if(uarts[nPort].inHead==BUFF_SIZE) uarts[nPort].inHead=0;
 	}
-
-	uarts[nPort].inBuf[uarts[nPort].inHead]=(unsigned char)i+48;
-	uarts[nPort].inHead++;
 }
 
 unsigned char * getSwFIFO(nPort){
-	int i = 0;
-	unsigned char * data = (unsigned char *) malloc(sizeof(unsigned char)*(uarts[nPort].inHead-uarts[nPort].inTail));
+	int i = 0, j = 0;
+	int numeroElementos = nElementosIn(nPort);
+	unsigned char * data = (unsigned char *) malloc(numeroElementos);
 
-	while(uarts[nPort].inHead!=uarts[nPort].inTail){
+	while(j < numeroElementos){
 		data[i] = uarts[nPort].inBuf[uarts[nPort].inTail];
 		uarts[nPort].inTail++;
 		if(uarts[nPort].inTail==BUFF_SIZE) uarts[nPort].inTail=1;
 		i++;
+		j++;
 	}
 
-	data[i] = "\0";
+	data[i] = '\0';
 
 	return data;
 }
