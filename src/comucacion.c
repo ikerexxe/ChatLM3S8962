@@ -27,14 +27,8 @@
 **********************************************************************/
 #include "framebuffer.h"
 #include "uartDrv.h"
+#include "chat.h"
 #include <string.h>
-
-/*********************************************************************
-** 																	**
-** DEFINITIONS AND MACROS 											**
-** 																	**
-**********************************************************************/
-#define MAX_RECIBIDOS 10
 
 /*********************************************************************
 ** 																	**
@@ -42,7 +36,8 @@
 ** 																	**
 **********************************************************************/
 int puerto = 0;
-int y = 15;
+int g_i_width = 0;
+int g_i_height = 15;
 unsigned char * datosRecibidos;
 int contRecibidos = 0;
 
@@ -61,7 +56,7 @@ int contRecibidos = 0;
 //TODO: faltan las explicaciones
 void CHAT_inicializacion_comunicacion(){
 	openUART(puerto);
-	datosRecibidos = malloc(sizeof(unsigned char)*MAX_RECIBIDOS);
+	datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 }
 
 void CHAT_ciere_comunicacion(){
@@ -87,8 +82,8 @@ void CHAT_recibir(){
 		//TODO: a revisar x e y
 		if(temporal[contTemporal] == 36){
 			datosRecibidos[contRecibidos] = '\0';
-			FRAME_BUFFER_insert_text(datosRecibidos,0,y);
-			y+=10;
+			FRAME_BUFFER_insert_text(datosRecibidos, g_i_width, g_i_height);
+			g_i_height+=10;
 			FRAME_BUFFER_write_to_display();
 			contTemporal = 0;
 			contRecibidos = 0;

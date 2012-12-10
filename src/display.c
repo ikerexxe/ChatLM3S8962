@@ -30,6 +30,7 @@
 #include "display.h"
 #include "displayGenerico.h"
 #include "framebuffer.h"
+#include "hw_types.h"
 /*********************************************************************
 ** 																	**
 ** DEFINITIONS AND MACROS 											**
@@ -42,6 +43,8 @@
 ** 																	**
 *********************************************************************/
 extern unsigned char g_note; /*Numero de nota*/
+extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
+extern tBoolean g_b_enviar;
 /*********************************************************************
 ** 																	**
 ** GLOBAL VARIABLES 												**
@@ -71,6 +74,11 @@ const unsigned char g_puc_nada[60]  =  {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     }; /*Dibujo vacío del tamaño del círculo*/
+
+unsigned char g_letra = 49;
+int g_i_tamano = 0;
+unsigned char * g_frase;
+int g_i_numero_elemento = 0;
 /*********************************************************************
 ** 																	**
 ** LOCAL FUNCTIONS 													**
@@ -85,13 +93,55 @@ const unsigned char g_puc_nada[60]  =  {
  * Al final, se vuelca a la pantalla real.
 */
 void CHAT_inicializacion_display(){
+	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+	char *str;
 
 	FRAME_BUFFER_init();
-	char *str;
 	str="----------------";
 	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
 	FRAME_BUFFER_write_to_display(); //Volcamos el buffer en la pantalla
 }
+
+/**
+ * @brief  Le damos valor a la nota.
+ *
+ * @return      -
+ *
+ * Se le asigna un valor a la variable g_note según la nota que
+ * se haya seleccionado.
+*/
+void CHAT_logica_teclas(){
+	switch(g_ul_keypad_switches){
+		case KEY_UP:
+			g_b_enviar = false;
+			g_frase[g_i_tamano] = g_letra;
+			g_frase[g_i_tamano+1] = '\0';
+			if(g_i_tamano!=0){
+				FRAME_BUFFER_delete_element(g_i_numero_elemento);
+			}
+			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,85);
+			FRAME_BUFFER_write_to_display();
+			g_i_tamano++;
+			g_letra++;
+			break;
+		case KEY_DOWN:
+			g_b_enviar = false;
+			break;
+		case KEY_LEFT:
+			g_b_enviar = false;
+			break;
+		case KEY_RIGHT:
+			g_b_enviar = false;
+			break;
+		case KEY_SELECT:
+			g_b_enviar = true;
+			break;
+		default:
+			g_b_enviar = false;
+			break;
+		}
+}
+
 /**
  * @brief  Función para dibujar la nota en la pantalla.
  *

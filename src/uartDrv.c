@@ -157,7 +157,6 @@ static int toHwFIFO(int nPort)
 void  __attribute__((interrupt)) UART0IntHandler(void)
 {
 	UARTIntHandlerLogic(0);
-	CHAT_recibir();
 }
 
 void  __attribute__((interrupt)) UART1IntHandler(void)
@@ -186,6 +185,9 @@ void UARTIntHandlerLogic(int nPort)
 	}
 	*/
 	UARTIntClear(uartsBases[nPort], ulStatus);
+
+	//TODO: va aqui fijo?
+	CHAT_recibir();
 }
 
 static int nHuecosIn(int nPort)

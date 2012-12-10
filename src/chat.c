@@ -33,6 +33,7 @@
 #include "display.h"
 #include "sonido.h"
 #include "comunicacion.h"
+#include "hw_types.h"
 
 /*********************************************************************
 ** 																	**
@@ -51,6 +52,8 @@ unsigned char g_note = 0; /*Numero de nota*/
 extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
 unsigned long g_ul_system_clock; /*Frecuencia del clock*/
 unsigned long g_us_note_frecuency = FRECUENCIA_SILENCIO; /*Frecuencia de las notas*/
+tBoolean g_b_enviar = false; //TODO: comentar a partir de aqui
+unsigned long g_ul_keypad_switches = 0x1f; /*Valor leído en los botones*/
 
 /*********************************************************************
 ** 																	**
@@ -99,7 +102,12 @@ void CHAT_inicializacion(){
 */
 //TODO: falta la explicarla bien
 void CHAT_logica(){
-	//CHAT_enviar("prueba");
+	CHAT_leer_keypad();
+	CHAT_logica_teclas();
+
+	if(g_b_enviar){
+		CHAT_enviar("a");
+	}
 }
 /*********************************************************************
 ** 																	**

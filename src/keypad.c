@@ -36,14 +36,13 @@
 ** EXPORTED VARIABLES 												**
 ** 																	**
 *********************************************************************/
-extern unsigned char g_note; /*Numero de nota*/
-extern unsigned long g_us_note_frecuency; /*Frecuencia de las notas*/
+extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
 /*********************************************************************
 ** 																	**
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
-unsigned long g_ul_keypad_switches = 0x1f; /*Valor leído en los botones*/
+
 /*********************************************************************
 ** 																	**
 ** LOCAL FUNCTIONS 													**
@@ -77,42 +76,12 @@ void CHAT_inicializacion_keypad(){
  * @return      -
  *
 */
-void MINI_PIANO_leer_keypad(){
+void CHAT_leer_keypad(){
 	unsigned long ul_pressed_data;
 	ul_pressed_data = (GPIOPinRead( GPIO_PORTE_BASE , (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3) )|
 				    	(GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_1) << 3));
 	g_ul_keypad_switches = ul_pressed_data;
 	g_ul_keypad_switches = g_ul_keypad_switches & 0x1f;
-}
-/**
- * @brief  Le damos valor a la nota.
- *
- * @return      -
- *
- * Se le asigna un valor a la variable g_note según la nota que
- * se haya seleccionado.
-*/
-void MINI_PIANO_elegir_nota(){
-	switch(g_ul_keypad_switches){
-		case KEY_UP:g_note = DO;
-		g_us_note_frecuency = FRECUENCIA_DO;
-			break;
-		case KEY_DOWN:g_note = RE;
-		g_us_note_frecuency = FRECUENCIA_RE;
-			break;
-		case KEY_LEFT:g_note = MI;
-		g_us_note_frecuency = FRECUENCIA_MI;
-			break;
-		case KEY_RIGHT:g_note = FA;
-		g_us_note_frecuency = FRECUENCIA_FA;
-			break;
-		case KEY_SELECT:g_note = SOL;
-		g_us_note_frecuency = FRECUENCIA_SOL;
-			break;
-		default:g_note = 6;
-		g_us_note_frecuency = FRECUENCIA_SILENCIO;
-			break;
-		}
 }
 /*********************************************************************
 ** 																	**

@@ -32,8 +32,8 @@
 ** 																			**
 ******************************************************************************/
 void CHAT_inicializacion_keypad();
-void MINI_PIANO_leer_keypad();
-void MINI_PIANO_elegir_nota();
+void CHAT_leer_keypad();
+void CHAT_logica_teclas();
 /*****************************************************************************
 **	 																		**
 ** TYPEDEFS AND STRUCTURES 													**
