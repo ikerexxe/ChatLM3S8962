@@ -37,6 +37,7 @@
 ** 																	**
 **********************************************************************/
 #define DISPLAY_C
+
 /*********************************************************************
 ** 																	**
 ** EXPORTED VARIABLES 												**
@@ -45,6 +46,8 @@
 extern unsigned char g_note; /*Numero de nota*/
 extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
 extern tBoolean g_b_enviar;
+extern unsigned char g_ucChangedData; //si se ha cambiado la tecla que se esta pulsando
+extern unsigned char * g_frase;
 /*********************************************************************
 ** 																	**
 ** GLOBAL VARIABLES 												**
@@ -75,10 +78,10 @@ const unsigned char g_puc_nada[60]  =  {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     }; /*Dibujo vacío del tamaño del círculo*/
 
-unsigned char g_letra = 49;
+unsigned char g_letra = 97;
 int g_i_tamano = 0;
-unsigned char * g_frase;
 int g_i_numero_elemento = 0;
+int g_i_altura_texto = 85;
 /*********************************************************************
 ** 																	**
 ** LOCAL FUNCTIONS 													**
@@ -97,9 +100,28 @@ void CHAT_inicializacion_display(){
 	char *str;
 
 	FRAME_BUFFER_init();
-	str="----------------";
+	str="----------(Final)";
 	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
-	FRAME_BUFFER_write_to_display(); //Volcamos el buffer en la pantalla
+	CHAT_escribir_usuario();
+}
+
+void CHAT_reinicializacion_display(){
+	int contador = 0;
+	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+
+	g_frase[0] = 'a';
+	g_frase[1] = '\0';
+
+	temporal[contador] = g_frase[0];
+	contador++;
+	for(contador; contador < (MAX_ELEMENTOS - 1); contador++){
+		temporal[contador] = 32;
+	}
+	temporal[contador] = '\0';
+
+	FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(temporal,0,g_i_altura_texto);
+	FRAME_BUFFER_write_to_display();
 }
 
 /**
@@ -111,37 +133,77 @@ void CHAT_inicializacion_display(){
  * se haya seleccionado.
 */
 void CHAT_logica_teclas(){
-	switch(g_ul_keypad_switches){
-		case KEY_UP:
-			g_b_enviar = false;
-			g_frase[g_i_tamano] = g_letra;
-			g_frase[g_i_tamano+1] = '\0';
-			if(g_i_tamano!=0){
-				FRAME_BUFFER_delete_element(g_i_numero_elemento);
-			}
-			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,85);
-			FRAME_BUFFER_write_to_display();
-			g_i_tamano++;
-			g_letra++;
-			break;
-		case KEY_DOWN:
-			g_b_enviar = false;
-			break;
-		case KEY_LEFT:
-			g_b_enviar = false;
-			break;
-		case KEY_RIGHT:
-			g_b_enviar = false;
-			break;
-		case KEY_SELECT:
-			g_b_enviar = true;
-			break;
-		default:
-			g_b_enviar = false;
-			break;
+	if(g_ucChangedData){
+		switch(g_ul_keypad_switches){
+			case KEY_UP:
+				if(g_letra == 57 ){
+					g_letra = 97;
+				} else if(g_letra == 122){
+					g_letra = 48;
+				} else{
+					g_letra++;
+				}
+				CHAT_escribir_usuario();
+				break;
+			case KEY_DOWN:
+				if(g_letra == 97 ){
+					g_letra = 57;
+				} else if(g_letra == 48){
+					g_letra = 122;
+				} else{
+					g_letra--;
+				}
+				CHAT_escribir_usuario();
+				break;
+			case KEY_LEFT:
+				g_frase[g_i_tamano] = 32;
+				if(g_i_tamano > 0){
+					g_i_tamano--;
+					g_letra = g_frase[g_i_tamano];
+					CHAT_borrar_usuario();
+				}
+				break;
+			case KEY_RIGHT:
+				if(g_i_tamano < MAX_ELEMENTOS){
+					g_i_tamano++;
+				}
+				g_letra = 97;
+				CHAT_escribir_usuario();
+				break;
+			case KEY_SELECT:
+				g_i_tamano = 0;
+				g_b_enviar = true;
+				break;
+			default:
+
+				break;
 		}
+	}
 }
 
+void CHAT_escribir_usuario(){
+	g_frase[g_i_tamano] = g_letra;
+	g_frase[g_i_tamano+1] = '\0';
+
+	if(g_i_tamano!=0){
+		FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	}
+
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_texto);
+	FRAME_BUFFER_write_to_display();
+}
+
+void CHAT_borrar_usuario(){
+	g_frase[g_i_tamano] = g_letra;
+	g_frase[g_i_tamano+2] = '\0';
+
+	if(g_i_tamano!=0){
+		FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	}
+
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_texto);
+	FRAME_BUFFER_write_to_display();
+}
 /**
  * @brief  Función para dibujar la nota en la pantalla.
  *

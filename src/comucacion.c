@@ -83,16 +83,18 @@ void CHAT_recibir(){
 		if(temporal[contTemporal] == 36){
 			datosRecibidos[contRecibidos] = '\0';
 			FRAME_BUFFER_insert_text(datosRecibidos, g_i_width, g_i_height);
-			g_i_height+=10;
+			if(g_i_height < 65){
+				g_i_height+=10;
+			}
 			FRAME_BUFFER_write_to_display();
 			contTemporal = 0;
 			contRecibidos = 0;
+			temporal[contTemporal] = '\0';
 		} else{
 			datosRecibidos[contRecibidos] = temporal[contTemporal];
 			contRecibidos++;
+			contTemporal++;
 		}
-
-		contTemporal++;
 	}
 }
 /*********************************************************************

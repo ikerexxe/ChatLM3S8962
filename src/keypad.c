@@ -37,6 +37,7 @@
 ** 																	**
 *********************************************************************/
 extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
+extern unsigned char g_ucChangedData; //si se ha cambiado la tecla que se esta pulsando
 /*********************************************************************
 ** 																	**
 ** GLOBAL VARIABLES 												**
@@ -80,6 +81,7 @@ void CHAT_leer_keypad(){
 	unsigned long ul_pressed_data;
 	ul_pressed_data = (GPIOPinRead( GPIO_PORTE_BASE , (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3) )|
 				    	(GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_1) << 3));
+	g_ucChangedData = g_ul_keypad_switches ^ ul_pressed_data;
 	g_ul_keypad_switches = ul_pressed_data;
 	g_ul_keypad_switches = g_ul_keypad_switches & 0x1f;
 }

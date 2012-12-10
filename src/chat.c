@@ -54,6 +54,8 @@ unsigned long g_ul_system_clock; /*Frecuencia del clock*/
 unsigned long g_us_note_frecuency = FRECUENCIA_SILENCIO; /*Frecuencia de las notas*/
 tBoolean g_b_enviar = false; //TODO: comentar a partir de aqui
 unsigned long g_ul_keypad_switches = 0x1f; /*Valor leído en los botones*/
+unsigned char g_ucChangedData = 0x00; //si se ha cambiado la tecla que se esta pulsando
+unsigned char * g_frase;
 
 /*********************************************************************
 ** 																	**
@@ -106,7 +108,9 @@ void CHAT_logica(){
 	CHAT_logica_teclas();
 
 	if(g_b_enviar){
-		CHAT_enviar("a");
+		CHAT_enviar(g_frase);
+		CHAT_reinicializacion_display();
+		g_b_enviar = false;
 	}
 }
 /*********************************************************************
