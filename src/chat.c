@@ -56,6 +56,7 @@ tBoolean g_b_enviar = false; //TODO: comentar a partir de aqui
 unsigned long g_ul_keypad_switches = 0x1f; /*Valor leído en los botones*/
 unsigned char g_ucChangedData = 0x00; //si se ha cambiado la tecla que se esta pulsando
 unsigned char * g_frase;
+int g_i_numero_elemento = 0;
 
 /*********************************************************************
 ** 																	**
@@ -112,6 +113,8 @@ void CHAT_logica(){
 		CHAT_reinicializacion_display();
 		g_b_enviar = false;
 	}
+
+	CHAT_recibir();
 }
 /*********************************************************************
 ** 																	**

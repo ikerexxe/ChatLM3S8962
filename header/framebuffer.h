@@ -29,7 +29,7 @@
 
 #define MAX_ROWS 11
 #define MAX_LINES 12
-#define MAX_ELEMS 4
+#define MAX_ELEMS 8
 /*****************************************************************************
 ** 																			**
 ** PROTOTYPES OF GLOBAL FUNCTIONS											**

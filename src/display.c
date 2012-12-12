@@ -80,7 +80,7 @@ const unsigned char g_puc_nada[60]  =  {
 
 unsigned char g_letra = 97;
 int g_i_tamano = 0;
-int g_i_numero_elemento = 0;
+extern int g_i_numero_elemento;
 int g_i_altura_texto = 85;
 /*********************************************************************
 ** 																	**

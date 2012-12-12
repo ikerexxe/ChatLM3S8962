@@ -46,7 +46,7 @@ int contRecibidos = 0;
 ** EXPORTED VARIABLES 												**
 ** 																	**
 *********************************************************************/
-
+extern int g_i_numero_elemento;
 
 /*********************************************************************
 ** 																	**
@@ -73,27 +73,47 @@ void CHAT_enviar(unsigned char * datos){
 
 void CHAT_recibir(){
 	int contTemporal = 0;
+	int x = 0;
+	int y = 0;
 	unsigned char * temporal;
+	int * recibido;
+	int a;
+	int actualizador = 0;
 
-	//TODO: a revisar el parametro de entrada
-	temporal = getSwFIFO(puerto);
+	(*recibido) = 0;
 
-	while(temporal[contTemporal]!='\0'){
-		//TODO: a revisar x e y
-		if(temporal[contTemporal] == 36){
-			datosRecibidos[contRecibidos] = '\0';
-			FRAME_BUFFER_insert_text(datosRecibidos, g_i_width, g_i_height);
-			if(g_i_height < 65){
-				g_i_height+=10;
+	//TODO: revisar la funcion recvUART pos si sirve mas que esta
+	recvUART(puerto, temporal, recibido);
+	if((*recibido)){
+		while(temporal[contTemporal]!='\0'){
+			//TODO: a revisar x e y
+			if(temporal[contTemporal] == 36){
+				datosRecibidos[contRecibidos] = '\0';
+				if(g_i_height < 65){
+					FRAME_BUFFER_insert_text(datosRecibidos, g_i_width, g_i_height);
+					g_i_height += 10;
+				} else{
+					FRAME_BUFFER_delete_element(actualizador);
+					actualizador = 1;
+					y = 15;
+					//TODO: puede que no sea asi sino -1
+					while(actualizador < MAX_ELEMS ){
+						if(actualizador!=g_i_numero_elemento){
+							FRAME_BUFFER_actualiza_posicion_elemento(actualizador, x, y);
+						}
+						y += 10;
+						actualizador++;
+					}
+				}
+				FRAME_BUFFER_write_to_display();
+				contTemporal = 0;
+				contRecibidos = 0;
+				temporal[contTemporal] = '\0';
+			} else{
+				datosRecibidos[contRecibidos] = temporal[contTemporal];
+				contRecibidos++;
+				contTemporal++;
 			}
-			FRAME_BUFFER_write_to_display();
-			contTemporal = 0;
-			contRecibidos = 0;
-			temporal[contTemporal] = '\0';
-		} else{
-			datosRecibidos[contRecibidos] = temporal[contTemporal];
-			contRecibidos++;
-			contTemporal++;
 		}
 	}
 }
