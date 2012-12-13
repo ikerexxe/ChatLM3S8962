@@ -81,7 +81,23 @@ const unsigned char g_puc_nada[60]  =  {
 unsigned char g_letra = 97;
 int g_i_tamano = 0;
 int g_i_numero_elemento = 0;
-int g_i_altura_texto = 85;
+int g_i_altura_usuario = 85;
+int g_i_altura_conversacion = 15;
+
+typedef struct s_SCREENCls
+{
+	unsigned char buffer[10];
+}BUFFERClass;
+
+typedef struct s_UARTCls
+{
+	int head;
+	int tail;
+	BUFFERClass screen[6];
+}SCREENClass;
+
+SCREENClass pantalla;
+
 /*********************************************************************
 ** 																	**
 ** LOCAL FUNCTIONS 													**
@@ -99,29 +115,12 @@ void CHAT_inicializacion_display(){
 	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 	char *str;
 
+	pantalla.tail = pantalla.head = 0;
+
 	FRAME_BUFFER_init();
 	str="----------(Final)";
 	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
-	CHAT_escribir_usuario();
-}
-
-void CHAT_reinicializacion_display(){
-	int contador = 0;
-	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
-
-	g_frase[0] = 'a';
-	g_frase[1] = '\0';
-
-	temporal[contador] = g_frase[0];
-	contador++;
-	for(contador; contador < (MAX_ELEMENTOS - 1); contador++){
-		temporal[contador] = 32;
-	}
-	temporal[contador] = '\0';
-
-	FRAME_BUFFER_delete_element(g_i_numero_elemento);
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(temporal,0,g_i_altura_texto);
-	FRAME_BUFFER_write_to_display();
+	CHAT_inicializacion_usuario();
 }
 
 /**
@@ -156,8 +155,8 @@ void CHAT_logica_teclas(){
 				CHAT_escribir_usuario();
 				break;
 			case KEY_LEFT:
-				g_frase[g_i_tamano] = 32;
 				if(g_i_tamano > 0){
+					g_frase[g_i_tamano] = 32;
 					g_i_tamano--;
 					g_letra = g_frase[g_i_tamano];
 					CHAT_borrar_usuario();
@@ -171,7 +170,7 @@ void CHAT_logica_teclas(){
 				CHAT_escribir_usuario();
 				break;
 			case KEY_SELECT:
-				g_i_tamano = 0;
+				CHAT_escribir_conversacion();
 				g_b_enviar = true;
 				break;
 			default:
@@ -181,15 +180,40 @@ void CHAT_logica_teclas(){
 	}
 }
 
+void CHAT_inicializacion_usuario(){
+	g_frase[g_i_tamano] = g_letra;
+	g_frase[g_i_tamano+1] = '\0';
+
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+	FRAME_BUFFER_write_to_display();
+}
+
+void CHAT_reinicializacion_usuario(){
+	int contador = 0;
+	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+
+	g_letra = 97;
+	g_frase[0] = g_letra;
+	g_frase[1] = '\0';
+
+	temporal[contador] = g_frase[0];
+	contador++;
+	for(contador; contador < (MAX_ELEMENTOS - 1); contador++){
+		temporal[contador] = 32;
+	}
+	temporal[contador] = '\0';
+
+	FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(temporal,0,g_i_altura_usuario);
+	FRAME_BUFFER_write_to_display();
+}
+
 void CHAT_escribir_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+1] = '\0';
 
-	if(g_i_tamano!=0){
-		FRAME_BUFFER_delete_element(g_i_numero_elemento);
-	}
-
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_texto);
+	FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -201,9 +225,25 @@ void CHAT_borrar_usuario(){
 		FRAME_BUFFER_delete_element(g_i_numero_elemento);
 	}
 
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_texto);
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_usuario);
 	FRAME_BUFFER_write_to_display();
 }
+
+void CHAT_escribir_conversacion(){
+	g_frase[g_i_tamano+1] = '\0';
+
+	if(pantalla.head < 6){
+		strcpy(pantalla.screen[pantalla.head].buffer, g_frase);
+		g_i_numero_elemento = FRAME_BUFFER_insert_text(pantalla.screen[pantalla.head].buffer, 0, g_i_altura_conversacion);
+		pantalla.head++;
+		g_i_altura_conversacion += 10;
+	}
+	FRAME_BUFFER_write_to_display();
+
+	g_i_tamano = 0;
+}
+
+
 /**
  * @brief  Función para dibujar la nota en la pantalla.
  *

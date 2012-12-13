@@ -109,7 +109,7 @@ void CHAT_logica(){
 
 	if(g_b_enviar){
 		CHAT_enviar(g_frase);
-		CHAT_reinicializacion_display();
+		CHAT_reinicializacion_usuario();
 		g_b_enviar = false;
 	}
 }
