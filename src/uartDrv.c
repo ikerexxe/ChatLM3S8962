@@ -68,9 +68,11 @@ int recvUART(int nPort, unsigned char *p, int *pSize)
 	int i,j,n;
 
 	n=nElementosIn(nPort);
+	/*
 	if(n>*pSize){
 		n=*pSize;
 	}
+	*/
 	*pSize=n;
 	j=uarts[nPort].inTail;
 	for(i=0;i<n;i++)
