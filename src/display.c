@@ -85,6 +85,7 @@ int g_i_altura_usuario = 85;
 int g_i_altura_conversacion = 15;
 int minus = 2;
 tBoolean ultimo_envio = true;
+int g_i_usuario = 0;
 
 unsigned char * concatenar_usuario();
 unsigned char * concatenar_remoto();
@@ -174,6 +175,7 @@ void CHAT_inicializacion_usuario(){
 	g_frase[g_i_tamano+1] = '\0';
 
 	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+	g_i_usuario = g_i_numero_elemento - 1;
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -190,8 +192,9 @@ void CHAT_reinicializacion_usuario(){
 	}
 	g_frase[contador] = '\0';
 
-	FRAME_BUFFER_delete_element((g_i_numero_elemento - minus));
+	FRAME_BUFFER_delete_element(g_i_usuario);
 	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+	g_i_usuario = g_i_numero_elemento - 1;
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -199,12 +202,7 @@ void CHAT_escribir_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+1] = '\0';
 
-	if(ultimo_envio){
-		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), g_frase);
-	} else{
-		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 2), g_frase);
-	}
-
+	FRAME_BUFFER_actualiza_texto_elemento(g_i_usuario, g_frase);
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -212,11 +210,7 @@ void CHAT_borrar_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+2] = '\0';
 
-	if(ultimo_envio){
-		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), g_frase);
-	} else{
-		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 2), g_frase);
-	}
+	FRAME_BUFFER_actualiza_texto_elemento(g_i_usuario, g_frase);
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -237,7 +231,6 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 	if(g_i_numero_elemento != MAX_ELEMS){
 		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, g_i_altura_conversacion);
 		g_i_altura_conversacion += 10;
-		minus = 2;
 	} else{
 		contador = 1;
 		g_i_numero_elemento = FRAME_BUFFER_delete_element(contador);
@@ -246,8 +239,11 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 			altura += 10;
 		}
 		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), final);
-		minus = 1;
-		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
+		if(ultimo_envio){
+			g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
+		} else{
+			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+		}
 	}
 
 	FRAME_BUFFER_write_to_display();
