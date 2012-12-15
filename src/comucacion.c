@@ -39,7 +39,7 @@ int puerto = 0;
 int g_i_width = 0;
 int g_i_height = 15;
 unsigned char * datosRecibidos;
-int contRecibidos = 0;
+tBoolean contRecibidos = false;
 
 /*********************************************************************
 ** 																	**
@@ -47,6 +47,8 @@ int contRecibidos = 0;
 ** 																	**
 *********************************************************************/
 extern int g_i_numero_elemento;
+
+tBoolean contains_end(unsigned char * data);
 
 /*********************************************************************
 ** 																	**
@@ -74,19 +76,31 @@ void CHAT_enviar(unsigned char * datos){
 void CHAT_recibir(){
 	int contTemporal = 0;
 	unsigned char * temporal;
+	char a;
+	tBoolean final = false;
 
 	//TODO: a revisar el parametro de entrada
 	temporal = getSwFIFO(puerto);
-
+	final = contains_end(temporal);
+	if(!contRecibidos){
+		strcpy(datosRecibidos, temporal);
+		contRecibidos = true;
+	} else{
+		strcat(datosRecibidos, temporal);
+	}
+	if(final){
+		CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
+		FRAME_BUFFER_write_to_display();
+		datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+		contRecibidos = false;
+	}
+	/*
 	while(temporal[contTemporal]!='\0'){
-		//TODO: a revisar x e y
 		if(temporal[contTemporal] == 36){
 			datosRecibidos[contRecibidos] = '\0';
-			FRAME_BUFFER_insert_text(datosRecibidos, g_i_width, g_i_height);
-			if(g_i_height < 65){
-				g_i_height+=10;
-			}
+			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
 			FRAME_BUFFER_write_to_display();
+			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 			contTemporal = 0;
 			contRecibidos = 0;
 			temporal[contTemporal] = '\0';
@@ -96,6 +110,23 @@ void CHAT_recibir(){
 			contTemporal++;
 		}
 	}
+	*/
+}
+
+tBoolean contains_end(unsigned char * data){
+	int contador = 0;
+	tBoolean resultado = false;
+
+	while(contador < MAX_ELEMS){
+		if(data[contador] == 36){
+			data[contador] = '\0';
+			resultado = true;
+			contador = MAX_ELEMS;
+		}
+		contador++;
+	}
+
+	return resultado;
 }
 /*********************************************************************
 ** 																	**

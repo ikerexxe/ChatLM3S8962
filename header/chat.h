@@ -52,6 +52,11 @@
 
 #define MAX_ELEMENTOS 10
 
+#define TIPO_USUARIO 0
+#define TIPO_REMOTO 1
+
+#define NULL 0
+
 /*****************************************************************************
 ** 																			**
 ** EOF 																		**

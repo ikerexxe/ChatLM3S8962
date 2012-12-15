@@ -83,20 +83,11 @@ int g_i_tamano = 0;
 int g_i_numero_elemento = 0;
 int g_i_altura_usuario = 85;
 int g_i_altura_conversacion = 15;
+int minus = 2;
+tBoolean ultimo_envio = true;
 
-typedef struct s_SCREENCls
-{
-	unsigned char buffer[10];
-}BUFFERClass;
-
-typedef struct s_UARTCls
-{
-	int head;
-	int tail;
-	BUFFERClass screen[6];
-}SCREENClass;
-
-SCREENClass pantalla;
+unsigned char * concatenar_usuario();
+unsigned char * concatenar_remoto();
 
 /*********************************************************************
 ** 																	**
@@ -114,8 +105,6 @@ SCREENClass pantalla;
 void CHAT_inicializacion_display(){
 	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 	char *str;
-
-	pantalla.tail = pantalla.head = 0;
 
 	FRAME_BUFFER_init();
 	str="----------(Final)";
@@ -170,7 +159,7 @@ void CHAT_logica_teclas(){
 				CHAT_escribir_usuario();
 				break;
 			case KEY_SELECT:
-				CHAT_escribir_conversacion();
+				CHAT_refrescar_conversacion();
 				g_b_enviar = true;
 				break;
 			default:
@@ -190,21 +179,19 @@ void CHAT_inicializacion_usuario(){
 
 void CHAT_reinicializacion_usuario(){
 	int contador = 0;
-	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+
+	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 
 	g_letra = 97;
-	g_frase[0] = g_letra;
-	g_frase[1] = '\0';
-
-	temporal[contador] = g_frase[0];
+	g_frase[contador] = g_letra;
 	contador++;
 	for(contador; contador < (MAX_ELEMENTOS - 1); contador++){
-		temporal[contador] = 32;
+		g_frase[contador] = 32;
 	}
-	temporal[contador] = '\0';
+	g_frase[contador] = '\0';
 
-	FRAME_BUFFER_delete_element(g_i_numero_elemento);
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(temporal,0,g_i_altura_usuario);
+	FRAME_BUFFER_delete_element((g_i_numero_elemento - minus));
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -212,8 +199,12 @@ void CHAT_escribir_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+1] = '\0';
 
-	FRAME_BUFFER_delete_element(g_i_numero_elemento);
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+	if(ultimo_envio){
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), g_frase);
+	} else{
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 2), g_frase);
+	}
+
 	FRAME_BUFFER_write_to_display();
 }
 
@@ -221,80 +212,82 @@ void CHAT_borrar_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+2] = '\0';
 
-	if(g_i_tamano!=0){
-		FRAME_BUFFER_delete_element(g_i_numero_elemento);
+	if(ultimo_envio){
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), g_frase);
+	} else{
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 2), g_frase);
 	}
-
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase,0,g_i_altura_usuario);
 	FRAME_BUFFER_write_to_display();
 }
 
-void CHAT_escribir_conversacion(){
-	g_frase[g_i_tamano+1] = '\0';
+void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
+	int contador = 0;
+	int altura = 15;
+	unsigned char * final;
 
-	if(pantalla.head < 6){
-		strcpy(pantalla.screen[pantalla.head].buffer, g_frase);
-		g_i_numero_elemento = FRAME_BUFFER_insert_text(pantalla.screen[pantalla.head].buffer, 0, g_i_altura_conversacion);
-		pantalla.head++;
-		g_i_altura_conversacion += 10;
+	if(!tipo){
+		ultimo_envio = true;
+		g_frase[g_i_tamano+1] = '\0';
+		final = concatenar_usuario();
+	} else{
+		ultimo_envio = false;
+		final = concatenar_remoto(mensaje);
 	}
-	FRAME_BUFFER_write_to_display();
 
+	if(g_i_numero_elemento != MAX_ELEMS){
+		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, g_i_altura_conversacion);
+		g_i_altura_conversacion += 10;
+		minus = 2;
+	} else{
+		contador = 1;
+		g_i_numero_elemento = FRAME_BUFFER_delete_element(contador);
+		for(contador; contador < g_i_numero_elemento; contador++){
+			FRAME_BUFFER_actualiza_posicion_elemento(contador, 0, altura);
+			altura += 10;
+		}
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), final);
+		minus = 1;
+		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
+	}
+
+	FRAME_BUFFER_write_to_display();
 	g_i_tamano = 0;
 }
 
+unsigned char * concatenar_usuario(){
+	int i = 4, j = 0;
+	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMENTOS+4));
 
-/**
- * @brief  Función para dibujar la nota en la pantalla.
- *
- * @return    -
- *
- * Se mira la nota que se haya elejido y se dibuja el círculo que le
- * corresponde. Al final, se vuelca en la pantalla.
-*/
-void MINI_PIANO_dibujar_en_pantalla(){
+	final[0] = 'Y';
+	final[1] = 'o';
+	final[2] = '-';
+	final[3] = '>';
+	while(j <= g_i_tamano){
+		final[i] = g_frase[j];
+		i++;
+		j++;
+	}
+	final[i] = '\0';
 
-	switch( g_note){
-		case DO:MINI_PIANO_dibujar_circulo( g_note, 10 , 30);
-			break;
-		case RE:MINI_PIANO_dibujar_circulo( g_note , 10 , 30);
-			break;
-		case MI:MINI_PIANO_dibujar_circulo( g_note , 10 , 30);
-			break;
-		case FA:MINI_PIANO_dibujar_circulo( g_note , 10 , 30);
-			break;
-		case SOL:MINI_PIANO_dibujar_circulo( g_note , 10 , 30);
-			break;
-		default:MINI_PIANO_dibujar_circulo( g_note , 10 , 30);
-			break;
-
-			}
-	FRAME_BUFFER_write_to_display(); //Volcamos el buffer en la pantalla
+	return final;
 }
-/**
- * @brief  Función para dibujar los círculos.
- *
- * @return    -
- * En el caso de que se haya pulsado algún botón, se dibuja un circulo en la nota
- * correspondiente y si no se borra de la pantalla.
- *
-*/
-void MINI_PIANO_dibujar_circulo(unsigned char state , int x , int y ){
-	int i = 0;
-	if (state == 6) {
-		FRAME_BUFFER_actualiza_posicion_elemento(2,-5, -5);
-		FRAME_BUFFER_actualiza_posicion_elemento(3,-5, -5);
-	}
-	else{
-		for (i = 0; i < 5 ; i++){	/*Definimos 5 estados, uno para cada nota*/
-			if (  state == i+1 ){
 
-					FRAME_BUFFER_insert_image(g_puc_circ , x+(20*i), y , 12, 10);
-					FRAME_BUFFER_actualiza_posicion_elemento(2,x+(20*i), y);
+unsigned char * concatenar_remoto(unsigned char * mensaje){
+	int i = 4, j = 0;
+	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMENTOS+4));
 
-			}
-		}
+	final[0] = 'P';
+	final[1] = 'C';
+	final[2] = '-';
+	final[3] = '>';
+	while(mensaje[j] != '\0'){
+		final[i] = mensaje[j];
+		i++;
+		j++;
 	}
+	final[i] = '\0';
+
+	return final;
 }
 /*********************************************************************
 ** 																	**

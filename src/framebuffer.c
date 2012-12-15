@@ -137,6 +137,10 @@ void FRAME_BUFFER_actualiza_posicion_elemento(int id, int x, int y){
 	g_display_elements[id].x = x;
 	g_display_elements[id].y = y;
 }
+
+void FRAME_BUFFER_actualiza_texto_elemento(int id, char *texto){
+	g_display_elements[id].picture_or_text = texto;
+}
 /**
  * @brief  Borramos un elemento del buffer
  *
@@ -188,7 +192,7 @@ void FRAME_BUFFER_write_to_display(void){
 	int size = 0; /*Tamaño del string*/
 	int index =0; /*Indice de posición en el array str*/
 	char str[30]; /*Array donde se va guardar el string*/
-	for(i=0;i< g_display_element_kop; i++){ //Volcamos todos los elementos existentes en en buffer
+	for(i=0;i < g_display_element_kop; i++){ //Volcamos todos los elementos existentes en en buffer
 		if(( g_display_elements[i].xOld != g_display_elements[i].x ) ||
 		(g_display_elements[i].yOld != g_display_elements[i].y ))
 		{
