@@ -32,7 +32,7 @@
 ** 																			**
 ******************************************************************************/
 void CHAT_inicializacion_pwm();
-void MINI_PIANO_reproducir_nota();
+void CHAT_PIANO_reproducir_nota();
 /*****************************************************************************
 **	 																		**
 ** TYPEDEFS AND STRUCTURES 													**

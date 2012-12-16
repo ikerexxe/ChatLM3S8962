@@ -90,10 +90,12 @@ void CHAT_recibir(){
 			strcat(datosRecibidos, temporal);
 		}
 		if(final){
+			CHAT_reproducir_aviso();
 			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
 			FRAME_BUFFER_write_to_display();
 			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 			contRecibidos = false;
+			CHAT_reproducir_silencio();
 		}
 	}
 	/*

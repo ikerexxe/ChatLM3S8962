@@ -32,6 +32,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/pwm.h"
 #include "sonido.h"
+#include "chat.h"
 /*********************************************************************
 ** 																	**
 ** EXPORTED VARIABLES 												**
@@ -89,8 +90,13 @@ void CHAT_inicializacion_pwm(){
  *
  * Se activa el PWM con la frecuencia seleccionada.
 */
-void MINI_PIANO_reproducir_nota(){
-	PWMGenPeriodSet(PWM_BASE, PWM_GEN_0,(g_ul_system_clock /(g_us_note_frecuency * 8)));
+void CHAT_reproducir_aviso(){
+	PWMGenPeriodSet(PWM_BASE, PWM_GEN_0,(g_ul_system_clock /(FRECUENCIA_DO * 8)));
+	PWMSyncUpdate(PWM_BASE, PWM_GEN_0_BIT);
+}
+
+void CHAT_reproducir_silencio(){
+	PWMGenPeriodSet(PWM_BASE, PWM_GEN_0,(g_ul_system_clock /(FRECUENCIA_SILENCIO * 8)));
 	PWMSyncUpdate(PWM_BASE, PWM_GEN_0_BIT);
 }
 /*********************************************************************
