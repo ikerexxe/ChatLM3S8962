@@ -75,24 +75,26 @@ void CHAT_enviar(unsigned char * datos){
 
 void CHAT_recibir(){
 	int contTemporal = 0;
-	unsigned char * temporal;
+	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
 	char a;
+	int tamano = 0;
 	tBoolean final = false;
 
-	//TODO: a revisar el parametro de entrada
-	temporal = getSwFIFO(puerto);
-	final = contains_end(temporal);
-	if(!contRecibidos){
-		strcpy(datosRecibidos, temporal);
-		contRecibidos = true;
-	} else{
-		strcat(datosRecibidos, temporal);
-	}
-	if(final){
-		CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
-		FRAME_BUFFER_write_to_display();
-		datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
-		contRecibidos = false;
+	recvUART(puerto, temporal, &tamano);
+	if(tamano > 0){
+		final = contains_end(temporal);
+		if(!contRecibidos){
+			strcpy(datosRecibidos, temporal);
+			contRecibidos = true;
+		} else{
+			strcat(datosRecibidos, temporal);
+		}
+		if(final){
+			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
+			FRAME_BUFFER_write_to_display();
+			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+			contRecibidos = false;
+		}
 	}
 	/*
 	while(temporal[contTemporal]!='\0'){
@@ -121,6 +123,9 @@ tBoolean contains_end(unsigned char * data){
 		if(data[contador] == 36){
 			data[contador] = '\0';
 			resultado = true;
+			contador = MAX_ELEMS;
+		} else if(!((data[contador] >= 48 && data[contador] <= 57) || (data[contador] >= 97 && data[contador] <= 122))){
+			data[contador] = '\0';
 			contador = MAX_ELEMS;
 		}
 		contador++;

@@ -112,6 +112,8 @@ void CHAT_logica(){
 		CHAT_reinicializacion_usuario(TIPO_USUARIO, NULL);
 		g_b_enviar = false;
 	}
+
+	//CHAT_recibir();
 }
 /*********************************************************************
 ** 																	**

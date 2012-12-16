@@ -246,7 +246,6 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 		}
 	}
 
-	FRAME_BUFFER_write_to_display();
 	g_i_tamano = 0;
 }
 
