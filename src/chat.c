@@ -89,7 +89,7 @@ void CHAT_inicializacion(){
 	CHAT_inicializacion_clock();
 	CHAT_inicializacion_keypad();
 	CHAT_inicializacion_display();
-	CHAT_inicializacion_pwm();
+	//CHAT_inicializacion_pwm();
 	CHAT_inicializacion_comunicacion();
 }
 

@@ -32,8 +32,9 @@
 ** 																			**
 ******************************************************************************/
 void CHAT_inicializacion_display();
-void MINI_PIANO_dibujar_en_pantalla();
-void MINI_PIANO_dibujar_circulo(unsigned char state , int x , int y );
+void CHAT_logica_teclas();
+void CHAT_reinicializacion_usuario();
+void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje);
 /*****************************************************************************
 **	 																		**
 ** TYPEDEFS AND STRUCTURES 													**

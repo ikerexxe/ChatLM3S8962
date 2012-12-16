@@ -33,7 +33,6 @@
 ******************************************************************************/
 void CHAT_inicializacion_keypad();
 void CHAT_leer_keypad();
-void CHAT_logica_teclas();
 /*****************************************************************************
 **	 																		**
 ** TYPEDEFS AND STRUCTURES 													**

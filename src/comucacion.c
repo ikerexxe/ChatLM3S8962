@@ -25,9 +25,13 @@
 ** MODULES USED 													**
 ** 																	**
 **********************************************************************/
+#include "hw_types.h"
 #include "framebuffer.h"
 #include "uartDrv.h"
 #include "chat.h"
+#include "sonido.h"
+#include "display.h"
+#include <stdlib.h>
 #include <string.h>
 
 /*********************************************************************
@@ -58,7 +62,7 @@ tBoolean contains_end(unsigned char * data);
 //TODO: faltan las explicaciones
 void CHAT_inicializacion_comunicacion(){
 	openUART(puerto);
-	datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+	datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 }
 
 void CHAT_ciere_comunicacion(){
@@ -74,9 +78,7 @@ void CHAT_enviar(unsigned char * datos){
 }
 
 void CHAT_recibir(){
-	int contTemporal = 0;
-	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
-	char a;
+	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 	int tamano = 0;
 	tBoolean final = false;
 
@@ -93,7 +95,7 @@ void CHAT_recibir(){
 			CHAT_reproducir_aviso();
 			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
 			FRAME_BUFFER_write_to_display();
-			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 			contRecibidos = false;
 			CHAT_reproducir_silencio();
 		}
@@ -121,14 +123,14 @@ tBoolean contains_end(unsigned char * data){
 	int contador = 0;
 	tBoolean resultado = false;
 
-	while(contador < MAX_ELEMS){
+	while(contador < MAX_ELEMS_PANTALLA){
 		if(data[contador] == 36){
 			data[contador] = '\0';
 			resultado = true;
-			contador = MAX_ELEMS;
+			contador = MAX_ELEMS_PANTALLA;
 		} else if(!((data[contador] >= 48 && data[contador] <= 57) || (data[contador] >= 97 && data[contador] <= 122))){
 			data[contador] = '\0';
-			contador = MAX_ELEMS;
+			contador = MAX_ELEMS_PANTALLA;
 		}
 		contador++;
 	}

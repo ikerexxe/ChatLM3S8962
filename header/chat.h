@@ -49,14 +49,17 @@
 #define KEY_LEFT 0x1b   //11011
 #define KEY_RIGHT 0x17  //10111
 #define KEY_SELECT 15 //01111
-
-#define MAX_ELEMENTOS 10
-
-#define TIPO_USUARIO 0
-#define TIPO_REMOTO 1
+/*
+ * Definición del numero maximo de caracteres por linea
+ */
+#define MAX_ELEMS_LINEA 10
+/*
+ * Definición del tipo de usuario que escribe en la conversacion
+ */
+#define TIPO_USUARIO 0 //El usuario de la stellaris
+#define TIPO_REMOTO 1 //El usuario del ordenador
 
 #define NULL 0
-
 /*****************************************************************************
 ** 																			**
 ** EOF 																		**

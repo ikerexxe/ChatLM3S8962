@@ -42,7 +42,7 @@
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
-DISPLAY_ELEMENT g_display_elements[MAX_ELEMS];
+DISPLAY_ELEMENT g_display_elements[MAX_ELEMS_PANTALLA];
 int g_display_element_kop = 0; /*Num. de elementos que hay en el buffer*/
 extern const unsigned char g_puc_nada[60];/*Dibujo vacío del tamaño del círculo*/
 /*********************************************************************
@@ -62,7 +62,7 @@ void FRAME_BUFFER_init(){
 	//Inicializamos la pantalla
 	DISPLAY_GENERICO_init();
 	//Creamos el buffer
-	for (i=0; i<MAX_ELEMS; i++){
+	for (i=0; i<MAX_ELEMS_PANTALLA; i++){
 		g_display_elements[i].id = i;
 		g_display_elements[i].x = i;
 		g_display_elements[i].y = i;
@@ -82,7 +82,7 @@ void FRAME_BUFFER_init(){
  * elementos que hay en el buffer despues de haber añadido ésta imagen.
 */
 int FRAME_BUFFER_insert_image(char *puc, int x, int y, int w, int h){
-	if(g_display_element_kop < MAX_ELEMS){
+	if(g_display_element_kop < MAX_ELEMS_PANTALLA){
 		g_display_elements[g_display_element_kop].id = g_display_element_kop;
 		g_display_elements[g_display_element_kop].picture_or_text = puc;
 		g_display_elements[g_display_element_kop].what = 0; //0 para imagen
@@ -104,7 +104,7 @@ int FRAME_BUFFER_insert_image(char *puc, int x, int y, int w, int h){
  * elementos que hay en el buffer despues de haber añadido éste texto.
 */
 int FRAME_BUFFER_insert_text(char *texto, int x, int y){
-	if(g_display_element_kop < MAX_ELEMS){
+	if(g_display_element_kop < MAX_ELEMS_PANTALLA){
 		g_display_elements[g_display_element_kop].id = g_display_element_kop;
 		g_display_elements[g_display_element_kop].picture_or_text = texto;
 		g_display_elements[g_display_element_kop].what = 1; //1 para texto
@@ -164,7 +164,7 @@ int FRAME_BUFFER_delete_element(int id){
 	g_display_elements[id].x = -5;
 	g_display_elements[id].y = -5;
 
-	for(i=id;i<MAX_ELEMS;i++){
+	for(i=id;i<MAX_ELEMS_PANTALLA;i++){
 		g_display_elements[i].picture_or_text = g_display_elements[i + 1].picture_or_text;
 		g_display_elements[i].what = g_display_elements[i + 1].what; //1 para texto
 		g_display_elements[i].x = g_display_elements[i + 1].x;

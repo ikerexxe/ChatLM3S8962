@@ -37,7 +37,6 @@ void DISPLAY_GENERICO_dibuja_imagen(const unsigned char *pucImage, unsigned long
         unsigned long ulY, unsigned long ulWidth,
         unsigned long ulHeight);
 void DISPLAY_GENERICO_init();
-void MINI_PIANO_inicializacion_led(void);
 /*****************************************************************************
 **	 																		**
 ** TYPEDEFS AND STRUCTURES 													**

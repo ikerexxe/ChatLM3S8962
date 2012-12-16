@@ -31,6 +31,7 @@
 #include "displayGenerico.h"
 #include "framebuffer.h"
 #include "hw_types.h"
+#include <stdlib.h>
 /*********************************************************************
 ** 																	**
 ** DEFINITIONS AND MACROS 											**
@@ -87,8 +88,11 @@ int minus = 2;
 tBoolean ultimo_envio = true;
 int g_i_usuario = 0;
 
-unsigned char * concatenar_usuario();
-unsigned char * concatenar_remoto();
+void CHAT_inicializacion_usuario();
+unsigned char * CHAT_concatenar_usuario();
+unsigned char * CHAT_concatenar_remoto();
+void CHAT_escribir_usuario();
+void CHAT_borrar_usuario();
 
 /*********************************************************************
 ** 																	**
@@ -104,7 +108,7 @@ unsigned char * concatenar_remoto();
  * Al final, se vuelca a la pantalla real.
 */
 void CHAT_inicializacion_display(){
-	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 	char *str;
 
 	FRAME_BUFFER_init();
@@ -153,14 +157,14 @@ void CHAT_logica_teclas(){
 				}
 				break;
 			case KEY_RIGHT:
-				if(g_i_tamano < MAX_ELEMENTOS){
+				if(g_i_tamano < MAX_ELEMS_LINEA){
 					g_i_tamano++;
 				}
 				g_letra = 97;
 				CHAT_escribir_usuario();
 				break;
 			case KEY_SELECT:
-				CHAT_refrescar_conversacion();
+				CHAT_refrescar_conversacion(TIPO_USUARIO, NULL);
 				g_b_enviar = true;
 				break;
 			default:
@@ -170,29 +174,64 @@ void CHAT_logica_teclas(){
 	}
 }
 
-void CHAT_inicializacion_usuario(){
-	g_frase[g_i_tamano] = g_letra;
-	g_frase[g_i_tamano+1] = '\0';
-
-	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
-	g_i_usuario = g_i_numero_elemento - 1;
-	FRAME_BUFFER_write_to_display();
-}
-
 void CHAT_reinicializacion_usuario(){
 	int contador = 0;
 
-	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
+	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 
 	g_letra = 97;
 	g_frase[contador] = g_letra;
 	contador++;
-	for(contador; contador < (MAX_ELEMENTOS - 1); contador++){
+	for(contador; contador < (MAX_ELEMS_LINEA - 1); contador++){
 		g_frase[contador] = 32;
 	}
 	g_frase[contador] = '\0';
 
 	FRAME_BUFFER_delete_element(g_i_usuario);
+	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+	g_i_usuario = g_i_numero_elemento - 1;
+	FRAME_BUFFER_write_to_display();
+}
+
+void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
+	int contador = 0;
+	int altura = 15;
+	unsigned char * final;
+
+	if(!tipo){
+		ultimo_envio = true;
+		g_frase[g_i_tamano+1] = '\0';
+		final = CHAT_concatenar_usuario();
+	} else{
+		ultimo_envio = false;
+		final = CHAT_concatenar_remoto(mensaje);
+	}
+
+	if(g_i_numero_elemento != MAX_ELEMS_PANTALLA){
+		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, g_i_altura_conversacion);
+		g_i_altura_conversacion += 10;
+	} else{
+		contador = 1;
+		g_i_numero_elemento = FRAME_BUFFER_delete_element(contador);
+		for(contador; contador < g_i_numero_elemento; contador++){
+			FRAME_BUFFER_actualiza_posicion_elemento(contador, 0, altura);
+			altura += 10;
+		}
+		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), final);
+		if(ultimo_envio){
+			g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
+		} else{
+			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
+		}
+	}
+
+	g_i_tamano = 0;
+}
+
+void CHAT_inicializacion_usuario(){
+	g_frase[g_i_tamano] = g_letra;
+	g_frase[g_i_tamano+1] = '\0';
+
 	g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
 	g_i_usuario = g_i_numero_elemento - 1;
 	FRAME_BUFFER_write_to_display();
@@ -214,44 +253,9 @@ void CHAT_borrar_usuario(){
 	FRAME_BUFFER_write_to_display();
 }
 
-void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
-	int contador = 0;
-	int altura = 15;
-	unsigned char * final;
-
-	if(!tipo){
-		ultimo_envio = true;
-		g_frase[g_i_tamano+1] = '\0';
-		final = concatenar_usuario();
-	} else{
-		ultimo_envio = false;
-		final = concatenar_remoto(mensaje);
-	}
-
-	if(g_i_numero_elemento != MAX_ELEMS){
-		g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, g_i_altura_conversacion);
-		g_i_altura_conversacion += 10;
-	} else{
-		contador = 1;
-		g_i_numero_elemento = FRAME_BUFFER_delete_element(contador);
-		for(contador; contador < g_i_numero_elemento; contador++){
-			FRAME_BUFFER_actualiza_posicion_elemento(contador, 0, altura);
-			altura += 10;
-		}
-		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), final);
-		if(ultimo_envio){
-			g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
-		} else{
-			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
-		}
-	}
-
-	g_i_tamano = 0;
-}
-
-unsigned char * concatenar_usuario(){
+unsigned char * CHAT_concatenar_usuario(){
 	int i = 4, j = 0;
-	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMENTOS+4));
+	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMS_LINEA+4));
 
 	final[0] = 'Y';
 	final[1] = 'o';
@@ -267,9 +271,9 @@ unsigned char * concatenar_usuario(){
 	return final;
 }
 
-unsigned char * concatenar_remoto(unsigned char * mensaje){
+unsigned char * CHAT_concatenar_remoto(unsigned char * mensaje){
 	int i = 4, j = 0;
-	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMENTOS+4));
+	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMS_LINEA+4));
 
 	final[0] = 'P';
 	final[1] = 'C';

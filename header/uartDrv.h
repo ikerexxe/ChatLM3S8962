@@ -1,21 +1,44 @@
+/*****************************************************************************
+**											  								**
+** project :  ChatLM3S8962					 							  	**
+** filename : uartDrv.h							  					    	**
+** version : 1 									  							**
+** date :  	2012-10-08		 		 									    **
+** 											  								**
+******************************************************************************
+** 											  								**
+**                      											  		**
+**  								  					                    **
+** 											  								**
+******************************************************************************
+**										        							**
+**VERSION HISTORY:									  						**
+**----------------									  						**
+**Version : 2										  						**
+**Date : 2012-12-16									 					    **
+**Revised by : iker pedrosa                    	  							**
+**Description : Modified version for the chat.				  				**
+*****************************************************************************/
+/*****************************************************************************
+** 																			**
+** DEFINITIONS AND MACROS 													**
+** 																			**
+******************************************************************************/
 #ifndef UARTDRV_H
 #define UARTDRV_H
 
-#include "uartDrv.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "inc/hw_ints.h"
-#include "driverlib/uart.h"
-#include "driverlib/gpio.h"
-#include "driverlib/interrupt.h"
-#include "comunicacion.h"
-#include <stdlib.h>
-
+/*****************************************************************************
+** 																			**
+** PROTOTYPES OF GLOBAL FUNCTIONS											**
+** 																			**
+******************************************************************************/
 int openUART(int nPort);
 void closeUART(int nPort);
 int recvUART(int nPort, unsigned char *p, int *pSize);
 int sendUART(int nPort, unsigned char *p, int *pSize);
-
-unsigned char * getSwFIFO(int nPort);
-
+/*****************************************************************************
+** 																			**
+** EOF 																		**
+** 																			**
+******************************************************************************/
 #endif
