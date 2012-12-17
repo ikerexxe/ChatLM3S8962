@@ -48,14 +48,9 @@ void CHAT_logica();
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
-unsigned char g_note = 0; /*Numero de nota*/
-extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
 unsigned long g_ul_system_clock; /*Frecuencia del clock*/
-unsigned long g_us_note_frecuency = FRECUENCIA_SILENCIO; /*Frecuencia de las notas*/
-tBoolean g_b_enviar = false; //TODO: comentar a partir de aqui
-unsigned long g_ul_keypad_switches = 0x1f; /*Valor leído en los botones*/
-unsigned char g_ucChangedData = 0x00; //si se ha cambiado la tecla que se esta pulsando
-unsigned char * g_frase;
+tBoolean g_b_enviar = false; /*Si hay mensaje para enviar*/
+unsigned char * g_frase; /*Lo escrito por el usuario de la stellaris*/
 
 /*********************************************************************
 ** 																	**
@@ -81,10 +76,9 @@ int main(void){
  *
  * @return    -
  *
- * Se inicializan uno a uno el clock, el PWM, la pantalla, los botones
- * y el led.
+ * Se inicializan uno a uno el clock, el keypad, la pantalla, el PWM y
+ * la UART.
 */
-//TODO: falta la explicacion con todos los perifericos
 void CHAT_inicializacion(){
 	CHAT_inicializacion_clock();
 	CHAT_inicializacion_keypad();
@@ -98,11 +92,11 @@ void CHAT_inicializacion(){
  *
  * @return    -
  *
- * Primero se lee la tecla pulsada, luego se elige la nota según la tecla
- * que se haya pulsado y luego, se reproduce la nota y se dibuja en la
- * pantalla.
+ * Primero se lee la tecla pulsada, luego se actualiza la pantalla teniendo
+ * en cuenta la tecla pulsa, si se pulsa el select se envía el mensaje y se
+ * reinicializa la parte de la pantalla en la que escribe el usuario.
 */
-//TODO: falta la explicarla bien
+//TODO: falta explicar lo de recibir
 void CHAT_logica(){
 	CHAT_leer_keypad();
 	CHAT_logica_teclas();

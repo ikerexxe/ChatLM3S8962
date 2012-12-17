@@ -1,7 +1,7 @@
 /*********************************************************************
 ** 																	**
 ** project : ChatLM3S8962	 										**
-** filename : uart.c 												**
+** filename : comunicacion.c 										**
 ** version : 1 														**
 ** date : 2012-12-05	 											**
 ** 																	**
@@ -39,19 +39,15 @@
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
-int puerto = 0;
-int g_i_width = 0;
-int g_i_height = 15;
-unsigned char * datosRecibidos;
-tBoolean contRecibidos = false;
+int g_i_puerto = 0; /*Puerto que se usa para la comunicacion*/
+unsigned char * datosRecibidos; /*Datos recibidos por la UART*/
+tBoolean recibido = false; /*Si datosRecibidos contiene datos*/
 
 /*********************************************************************
 ** 																	**
-** EXPORTED VARIABLES 												**
+** PROTOTYPES OF LOCAL FUNCTIONS 									**
 ** 																	**
 *********************************************************************/
-extern int g_i_numero_elemento;
-
 tBoolean contains_end(unsigned char * data);
 
 /*********************************************************************
@@ -59,35 +55,63 @@ tBoolean contains_end(unsigned char * data);
 ** LOCAL FUNCTIONS 													**
 ** 																	**
 **********************************************************************/
-//TODO: faltan las explicaciones
+
+/**
+ * @brief  Función para inicializar la comunicación.
+ *
+ * @return    -
+ *
+ * Se abre el puerto de comunicaciones de la UART.
+*/
 void CHAT_inicializacion_comunicacion(){
-	openUART(puerto);
+	openUART(g_i_puerto);
 	datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 }
 
+/**
+ * @brief  Función para finalizar la comunicación.
+ *
+ * @return    -
+ *
+ * Se cierra el puerto de comunicaciones de la UART.
+*/
 void CHAT_ciere_comunicacion(){
-	closeUART(puerto);
+	closeUART(g_i_puerto);
 }
 
+/**
+ * @brief  Función para enviar los datos.
+ *
+ * @return    -
+ *
+ * Se envian los datos usando la UART.
+*/
 void CHAT_enviar(unsigned char * datos){
-	int tamano;
+	int tamano; //Tamaño del texto a enviar
 
 	tamano=strlen(datos);
 
-	sendUART(puerto, datos, &tamano);
+	sendUART(g_i_puerto, datos, &tamano);
 }
 
+/**
+ * @brief  Función para la recepcion de datos.
+ *
+ * @return    -
+ *
+ * Se tratan los datos recibidos usando la UART.
+*/
 void CHAT_recibir(){
-	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
-	int tamano = 0;
-	tBoolean final = false;
+	unsigned char * temporal = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA); //String temporal donde se guarda lo recibido
+	int tamano = 0; //Tamaño del texto recibido
+	tBoolean final = false; //Si se ha recibido el token final
 
-	recvUART(puerto, temporal, &tamano);
+	recvUART(g_i_puerto, temporal, &tamano);
 	if(tamano > 0){
 		final = contains_end(temporal);
-		if(!contRecibidos){
+		if(!recibido){
 			strcpy(datosRecibidos, temporal);
-			contRecibidos = true;
+			recibido = true;
 		} else{
 			strcat(datosRecibidos, temporal);
 		}
@@ -96,32 +120,22 @@ void CHAT_recibir(){
 			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
 			FRAME_BUFFER_write_to_display();
 			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
-			contRecibidos = false;
+			recibido = false;
 			CHAT_reproducir_silencio();
 		}
 	}
-	/*
-	while(temporal[contTemporal]!='\0'){
-		if(temporal[contTemporal] == 36){
-			datosRecibidos[contRecibidos] = '\0';
-			CHAT_refrescar_conversacion(TIPO_REMOTO, datosRecibidos);
-			FRAME_BUFFER_write_to_display();
-			datosRecibidos = malloc(sizeof(unsigned char)*MAX_ELEMENTOS);
-			contTemporal = 0;
-			contRecibidos = 0;
-			temporal[contTemporal] = '\0';
-		} else{
-			datosRecibidos[contRecibidos] = temporal[contTemporal];
-			contRecibidos++;
-			contTemporal++;
-		}
-	}
-	*/
 }
 
+/**
+ * @brief  Función que mira si se ha terminado de transmitir.
+ *
+ * @return    -
+ *
+ * Se mira si se ha recibido el caracter de fin de conversacion.
+*/
 tBoolean contains_end(unsigned char * data){
-	int contador = 0;
-	tBoolean resultado = false;
+	int contador = 0; //Contador para recorrer el string
+	tBoolean resultado = false; //Si se ha recibido el token final
 
 	while(contador < MAX_ELEMS_PANTALLA){
 		if(data[contador] == 36){

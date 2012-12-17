@@ -39,7 +39,7 @@
 ** 																	**
 *********************************************************************/
 extern unsigned long g_ul_system_clock; /*Frecuencia del clock*/
-extern unsigned long g_us_note_frecuency; /*Frecuencia de las notas*/
+
 /*********************************************************************
 ** 																	**
 ** LOCAL FUNCTIONS 													**
@@ -83,6 +83,7 @@ void CHAT_inicializacion_pwm(){
 	//Activamos la salida del pwm
 	PWMOutputState(PWM_BASE, PWM_OUT_1_BIT, true);
 }
+
 /**
  * @brief  Reproducir una nota con el PWM.
  *
@@ -95,6 +96,13 @@ void CHAT_reproducir_aviso(){
 	PWMSyncUpdate(PWM_BASE, PWM_GEN_0_BIT);
 }
 
+/**
+ * @brief  Reproducir silencio con el PWM.
+ *
+ * @return     -
+ *
+ * Se activa el PWM con la frecuencia silencio.
+*/
 void CHAT_reproducir_silencio(){
 	PWMGenPeriodSet(PWM_BASE, PWM_GEN_0,(g_ul_system_clock /(FRECUENCIA_SILENCIO * 8)));
 	PWMSyncUpdate(PWM_BASE, PWM_GEN_0_BIT);
@@ -104,10 +112,3 @@ void CHAT_reproducir_silencio(){
 ** EOF 																**
 ** 																	**
 **********************************************************************/
-
-
-
-
-
-
-

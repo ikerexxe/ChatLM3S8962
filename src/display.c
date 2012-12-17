@@ -44,16 +44,24 @@
 ** EXPORTED VARIABLES 												**
 ** 																	**
 *********************************************************************/
-extern unsigned char g_note; /*Numero de nota*/
 extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
-extern tBoolean g_b_enviar;
-extern unsigned char g_ucChangedData; //si se ha cambiado la tecla que se esta pulsando
-extern unsigned char * g_frase;
+extern tBoolean g_b_enviar; /*Si hay mensaje para enviar*/
+extern unsigned char g_ucChangedData; /*Si ha cambiado la tecla que se está pulsando*/
+extern unsigned char * g_frase; /*Lo escrito por el usuario de la stellaris*/
+
 /*********************************************************************
 ** 																	**
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
+unsigned char g_letra = 97; /*Letra que se muestra actualmente en el display*/
+int g_i_tamano = 0; /*Cantidad de caracteres que tiene la frase del usuario*/
+int g_i_numero_elemento = 0; /*Identificador del ultimo texto introducido en pantalla*/
+int g_i_usuario = 0; /*Identificador del texto del usuario que se muestra en pantalla*/
+int g_i_altura_conversacion = 15; /*Altura en la cual se encuentra la conversacion*/
+int g_i_altura_usuario = 85; /*Altura en la cual se inserta el texto del usuario*/
+tBoolean ultimo_usuario = true; /*Si el ultimo texto introducido en la conversacion es del usuario*/
+
 const unsigned char g_puc_circ[60]  =  {
         0x00, 0x00, 0x44, 0x44, 0x00, 0x00,
         0x00, 0x4a, 0xaa, 0xaa, 0xa4, 0x00,
@@ -79,15 +87,11 @@ const unsigned char g_puc_nada[60]  =  {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     }; /*Dibujo vacío del tamaño del círculo*/
 
-unsigned char g_letra = 97;
-int g_i_tamano = 0;
-int g_i_numero_elemento = 0;
-int g_i_altura_usuario = 85;
-int g_i_altura_conversacion = 15;
-int minus = 2;
-tBoolean ultimo_envio = true;
-int g_i_usuario = 0;
-
+/*********************************************************************
+** 																	**
+** PROTOTYPES OF LOCAL FUNCTIONS 									**
+** 																	**
+*********************************************************************/
 void CHAT_inicializacion_usuario();
 unsigned char * CHAT_concatenar_usuario();
 unsigned char * CHAT_concatenar_remoto();
@@ -99,12 +103,13 @@ void CHAT_borrar_usuario();
 ** LOCAL FUNCTIONS 													**
 ** 																	**
 **********************************************************************/
+
 /**
- * @brief  Inicializamos y escribimos notas en la pantalla.
+ * @brief  Inicializamos la pantalla.
  *
  * @return    -
  *
- * Primero se inicializa el buffer, y luego se escriben las notas en él.
+ * Primero se inicializa el buffer y luego se inicializa el texto del usuario.
  * Al final, se vuelca a la pantalla real.
 */
 void CHAT_inicializacion_display(){
@@ -114,16 +119,20 @@ void CHAT_inicializacion_display(){
 	FRAME_BUFFER_init();
 	str="----------(Final)";
 	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
-	CHAT_inicializacion_usuario();
+	CHAT_inicializacion_usuario(); //Inicializamos el texto del usuario y lo volvamos a la pantalla
 }
 
 /**
- * @brief  Le damos valor a la nota.
+ * @brief  Refrescamos la pantalla o enviamos los datos.
  *
  * @return      -
  *
- * Se le asigna un valor a la variable g_note según la nota que
- * se haya seleccionado.
+ * Se refresca la pantalla dependiendo de la tecla pulsada o se envia el texto.
+ * 		*Arriba: se muestra el siguiente caracter.
+ * 		*Abajo: se muestra el anterior caracter.
+ * 		*Derecha: aumentamos en uno el numero de caracteres.
+ * 		*Izquierda: reducimos en uno el numero de caracteres.
+ * 		*Select: enviar el texto.
 */
 void CHAT_logica_teclas(){
 	if(g_ucChangedData){
@@ -168,14 +177,20 @@ void CHAT_logica_teclas(){
 				g_b_enviar = true;
 				break;
 			default:
-
 				break;
 		}
 	}
 }
 
+/**
+ * @brief  Reinicializamos la parte de la pantalla del usuario.
+ *
+ * @return    -
+ *
+ * Vaciamos lo escrito por el usuario y ponemos la letra inicial.
+*/
 void CHAT_reinicializacion_usuario(){
-	int contador = 0;
+	int contador = 0; //Contador para recorrer el string de datos a escribir en pantalla
 
 	g_frase = malloc(sizeof(unsigned char)*MAX_ELEMS_LINEA);
 
@@ -193,17 +208,25 @@ void CHAT_reinicializacion_usuario(){
 	FRAME_BUFFER_write_to_display();
 }
 
+/**
+ * @brief  Insertar la ultima frase de la conversacion
+ *
+ * @return    -
+ *
+ * Si se recibe un texto se muestra en pantalla poniendo como inicio PC-> y si
+ * se envia se pone Yo->
+*/
 void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 	int contador = 0;
 	int altura = 15;
 	unsigned char * final;
 
 	if(!tipo){
-		ultimo_envio = true;
+		ultimo_usuario = true;
 		g_frase[g_i_tamano+1] = '\0';
 		final = CHAT_concatenar_usuario();
 	} else{
-		ultimo_envio = false;
+		ultimo_usuario = false;
 		final = CHAT_concatenar_remoto(mensaje);
 	}
 
@@ -218,7 +241,7 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 			altura += 10;
 		}
 		FRAME_BUFFER_actualiza_texto_elemento((g_i_numero_elemento - 1), final);
-		if(ultimo_envio){
+		if(ultimo_usuario){
 			g_i_numero_elemento = FRAME_BUFFER_insert_text(final, 0, 100);
 		} else{
 			g_i_numero_elemento = FRAME_BUFFER_insert_text(g_frase, 0, g_i_altura_usuario);
@@ -228,6 +251,13 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 	g_i_tamano = 0;
 }
 
+/**
+ * @brief  Inicializamos la parte de la pantalla del usuario.
+ *
+ * @return    -
+ *
+ * Se escribe la letra inicial en pantalla.
+*/
 void CHAT_inicializacion_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+1] = '\0';
@@ -237,6 +267,13 @@ void CHAT_inicializacion_usuario(){
 	FRAME_BUFFER_write_to_display();
 }
 
+/**
+ * @brief  Escritura en la parte del usuario.
+ *
+ * @return    -
+ *
+ * Se escribe en pantalla reaccionando al boton pulsado por el usuario.
+*/
 void CHAT_escribir_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+1] = '\0';
@@ -245,6 +282,13 @@ void CHAT_escribir_usuario(){
 	FRAME_BUFFER_write_to_display();
 }
 
+/**
+ * @brief  Escritura de la parte del usuario.
+ *
+ * @return    -
+ *
+ * Se borra la ultima letra introducida por el usuario.
+*/
 void CHAT_borrar_usuario(){
 	g_frase[g_i_tamano] = g_letra;
 	g_frase[g_i_tamano+2] = '\0';
@@ -253,6 +297,13 @@ void CHAT_borrar_usuario(){
 	FRAME_BUFFER_write_to_display();
 }
 
+/**
+ * @brief  Concatenacion de lo escrito por el usuario y Yo->
+ *
+ * @return    -
+ *
+ * Se concatena lo que ha escrito el usuario y la parte de Yo->
+*/
 unsigned char * CHAT_concatenar_usuario(){
 	int i = 4, j = 0;
 	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMS_LINEA+4));
@@ -271,6 +322,13 @@ unsigned char * CHAT_concatenar_usuario(){
 	return final;
 }
 
+/**
+ * @brief  Concatenacion de lo recibido por la UART y PC->
+ *
+ * @return    -
+ *
+ * Se concatena lo que ha se ha recibido y la parte de PC->
+*/
 unsigned char * CHAT_concatenar_remoto(unsigned char * mensaje){
 	int i = 4, j = 0;
 	unsigned char * final = malloc(sizeof(unsigned char)*(MAX_ELEMS_LINEA+4));
@@ -293,12 +351,3 @@ unsigned char * CHAT_concatenar_remoto(unsigned char * mensaje){
 ** EOF 																**
 ** 																	**
 **********************************************************************/
-
-
-
-
-
-
-
-
-

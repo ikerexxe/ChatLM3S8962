@@ -137,7 +137,13 @@ void FRAME_BUFFER_actualiza_posicion_elemento(int id, int x, int y){
 	g_display_elements[id].x = x;
 	g_display_elements[id].y = y;
 }
-
+/**
+ * @brief  Cambiamos el texto de un elemento existente.
+ *
+ * @return  -
+ *
+ * Se actualiza el texto del elemento.
+*/
 void FRAME_BUFFER_actualiza_texto_elemento(int id, char *texto){
 	g_display_elements[id].picture_or_text = texto;
 }

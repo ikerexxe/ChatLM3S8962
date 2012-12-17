@@ -1,3 +1,31 @@
+/*********************************************************************
+** 																	**
+** project : ChatLM3S8962	 										**
+** filename : uartDrv.c 											**
+** version : 1 														**
+** date : 2012-12-05	 											**
+** 																	**
+**********************************************************************
+** 																	**
+** Copyright (c) 2012,		 										**
+** All rights reserved. 											**
+** 																	**
+**********************************************************************
+**																	**
+**VERSION HISTORY:													**
+**----------------													**
+**Version : 1														**
+**Date : 2012-12-05													**
+**Revised by : iker pedrosa											**
+**Description : Original version.									**
+*********************************************************************/
+#define UARTDRV_C
+
+/*********************************************************************
+**																	**
+** MODULES USED 													**
+** 																	**
+**********************************************************************/
 #include "uartDrv.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
@@ -9,6 +37,11 @@
 #include "uartConfig.h"
 #include <stdlib.h>
 
+/*****************************************************************************
+**	 																		**
+** TYPEDEFS AND STRUCTURES 													**
+** 																			**
+*****************************************************************************/
 typedef struct s_UARTCls
 {
 	//for reception
@@ -21,11 +54,21 @@ typedef struct s_UARTCls
    unsigned char outBuf[BUFF_SIZE];
 }UARTClass;
 
-unsigned long uartsBases[]={UART0_BASE,UART1_BASE};
-unsigned long uartsInts[]={INT_UART0,INT_UART1};
+/*********************************************************************
+** 																	**
+** GLOBAL VARIABLES 												**
+** 																	**
+**********************************************************************/
+unsigned long uartsBases[]={UART0_BASE,UART1_BASE}; /*Identificadores de las UART*/
+unsigned long uartsInts[]={INT_UART0,INT_UART1}; /*Interrupciones de las UART*/
 /*Creamos los objetos de comunicaciones: UARTClass*/
-UARTClass uarts[3];
+UARTClass uarts[3]; /*Clase que contiene los datos de la UART*/
 
+/*********************************************************************
+** 																	**
+** PROTOTYPES OF LOCAL FUNCTIONS 									**
+** 																	**
+*********************************************************************/
 static int nElementosIn(int nPort);
 static int nHuecosIn(int nPort);
 static int nElementosOut(int nPort);
@@ -38,19 +81,33 @@ void UARTIntHandlerLogic(int nPort);
 void  __attribute__((interrupt)) UART0IntHandler(void);
 void  __attribute__((interrupt)) UART1IntHandler(void);
 
+/**
+ * @brief  Función para inicializar los PINS de la UART.
+ *
+ * @return    -
+ *
+ * Inicializa los PINs para poder usar la UART.
+*/
 static void initUartPins(int nPort)
 {
-	switch(nPort)
-	{
-		case 0: SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-				SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-				GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-				break;
-		default:
-				break;
-	}
+  switch(nPort)
+  {
+    case 0: SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+			SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+			GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+			break;
+	default:
+			break;
+  }
 }
 
+/**
+ * @brief  Función para inicializar uno de los puertos UART.
+ *
+ * @return    -
+ *
+ * Inicializa el puerto 0 de la UART.
+*/
 int openUART(int nPort)
 {
   initUartPins(nPort);
@@ -64,12 +121,27 @@ int openUART(int nPort)
   return 0;
 }
 
+/**
+ * @brief  Función para cerrar uno de los puertos UART.
+ *
+ * @return    -
+ *
+ * Cierra el puerto 0 de la UART.
+*/
 void closeUART(int nPort)
 {
   UARTDisable(uartsBases[nPort]);
   IntDisable(INT_UART0);
 }
 
+/**
+ * @brief  Función para retorna los datos recibidos por la UART.
+ *
+ * @return    Exito de la recepcion
+ *
+ * Retorna los datos que se han almacenado en el buffer de software a la
+ * logica del usuario.
+*/
 int recvUART(int nPort, unsigned char *p, int *pSize)
 {
   int i,j,n;
@@ -88,6 +160,13 @@ int recvUART(int nPort, unsigned char *p, int *pSize)
   return 1;
 }
 
+/**
+ * @brief  Función para enviar datos por la UART.
+ *
+ * @return    Existo del envio
+ *
+ * Guarda los datos a enviar en el el buffer de software.
+*/
 int sendUART(int nPort, unsigned char *p, int *pSize)
 {
   int i,j,n,retry;
@@ -104,36 +183,52 @@ int sendUART(int nPort, unsigned char *p, int *pSize)
   uarts[nPort].outHead=j;
   do
   {
-	  uarts[nPort].writingToBuf=1;
-	  n=toHwFIFO(nPort);
-	  uarts[nPort].writingToBuf=0;
-	  if(uarts[nPort].intWhileWriting)
-	  {
-	    uarts[nPort].intWhileWriting=0;
-	    retry=uarts[nPort].outHead!=uarts[nPort].outTail;
-	  }
-	  else retry=0;
+	uarts[nPort].writingToBuf=1;
+	n=toHwFIFO(nPort);
+	uarts[nPort].writingToBuf=0;
+	if(uarts[nPort].intWhileWriting)
+	{
+	  uarts[nPort].intWhileWriting=0;
+	  retry=uarts[nPort].outHead!=uarts[nPort].outTail;
+	}
+	else retry=0;
   }while(retry);
   return 1;
 }
 
+/**
+ * @brief  Guarda los datos en el buffer del software.
+ *
+ * @return    -
+ *
+ * Guardado de los datos del buffer de hardware en el buffer de
+ * software para su posterior tratamiento por la logica del usuario.
+*/
 static void fromHwFIFO(int nPort)
 {
-	int n;
-	int i = 0;
-	unsigned int l;
+  int n;
+  int i = 0;
+  unsigned int l;
 
-	n=nHuecosIn(nPort);
-	while(UARTCharsAvail(uartsBases[nPort])&& (n-->0))
-	{
-		l=UARTCharGetNonBlocking(uartsBases[nPort]);
-		uarts[nPort].inBuf[uarts[nPort].inHead]=(unsigned char)l;
-		uarts[nPort].inHead++;
-		i++;
-		if(uarts[nPort].inHead==BUFF_SIZE) uarts[nPort].inHead=0;
-	}
+  n=nHuecosIn(nPort);
+  while(UARTCharsAvail(uartsBases[nPort])&& (n-->0))
+  {
+    l=UARTCharGetNonBlocking(uartsBases[nPort]);
+	uarts[nPort].inBuf[uarts[nPort].inHead]=(unsigned char)l;
+	uarts[nPort].inHead++;
+	i++;
+	if(uarts[nPort].inHead==BUFF_SIZE) uarts[nPort].inHead=0;
+  }
 }
 
+/**
+ * @brief  Guarda los datos en el buffer del hardware.
+ *
+ * @return    -
+ *
+ * Guardado de los datos del buffer de software en el buffer de
+ * hardware para su posterior envio.
+*/
 static int toHwFIFO(int nPort)
 {
 	unsigned char c;
@@ -151,16 +246,37 @@ static int toHwFIFO(int nPort)
 	return m;
 }
 
+/**
+ * @brief  Rutina de interrupcion.
+ *
+ * @return    -
+ *
+ * Rutina de interrupcion de la UART 0.
+*/
 void  __attribute__((interrupt)) UART0IntHandler(void)
 {
 	UARTIntHandlerLogic(0);
 }
 
+/**
+ * @brief  Rutina de interrupcion.
+ *
+ * @return    -
+ *
+ * Rutina de interrupcion de la UART 1.
+*/
 void  __attribute__((interrupt)) UART1IntHandler(void)
 {
 	UARTIntHandlerLogic(1);
 }
 
+/**
+ * @brief  Tratamiento de interrupciones.
+ *
+ * @return    -
+ *
+ * Tratamiento de las interrupciones de la UART.
+*/
 void UARTIntHandlerLogic(int nPort)
 {
   unsigned long ulStatus;
@@ -193,22 +309,51 @@ void UARTIntHandlerLogic(int nPort)
   CHAT_recibir();
 }
 
+/**
+ * @brief  Numero de huecos libres en el buffer del hardware de entrada.
+ *
+ * @return    Numero de elementos
+ *
+*/
 static int nHuecosIn(int nPort)
 {
 	return (uarts[nPort].inTail+BUFF_SIZE-uarts[nPort].inHead-1) % BUFF_SIZE;
 }
 
+/**
+ * @brief  Numero de elementos en el buffer del hardware de entrada.
+ *
+ * @return    Numero de elementos
+ *
+*/
 static int nElementosIn(int nPort)
 {
 	return (uarts[nPort].inHead+BUFF_SIZE-uarts[nPort].inTail) % BUFF_SIZE;
 }
 
+/**
+ * @brief  Numero de huecos libres en el buffer del hardware de salida.
+ *
+ * @return    Numero de huecos libres
+ *
+*/
 static int nHuecosOut(int nPort)
 {
 	return (uarts[nPort].outTail+BUFF_SIZE-uarts[nPort].outHead-1) % BUFF_SIZE;
 }
 
+/**
+ * @brief  Numero de elementos en el buffer del hardware de salida.
+ *
+ * @return    Numero de elementos
+ *
+*/
 static int nElementosOut(int nPort)
 {
 	return (uarts[nPort].outHead+BUFF_SIZE-uarts[nPort].outTail) % BUFF_SIZE;
 }
+/*********************************************************************
+** 																	**
+** EOF 																**
+** 																	**
+**********************************************************************/

@@ -33,16 +33,11 @@
 #include "chat.h"
 /*********************************************************************
 ** 																	**
-** EXPORTED VARIABLES 												**
-** 																	**
-*********************************************************************/
-extern unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
-extern unsigned char g_ucChangedData; //si se ha cambiado la tecla que se esta pulsando
-/*********************************************************************
-** 																	**
 ** GLOBAL VARIABLES 												**
 ** 																	**
 **********************************************************************/
+unsigned long g_ul_keypad_switches; /*Valor leído en los botones*/
+unsigned char g_ucChangedData; /*Si ha cambiado la tecla que se está pulsando*/
 
 /*********************************************************************
 ** 																	**
