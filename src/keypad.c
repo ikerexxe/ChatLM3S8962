@@ -73,7 +73,7 @@ void CHAT_inicializacion_keypad(){
  *
 */
 void CHAT_leer_keypad(){
-	unsigned long ul_pressed_data;
+	unsigned long ul_pressed_data; /*Guarda el valor de la tecla pulsada*/
 	ul_pressed_data = (GPIOPinRead( GPIO_PORTE_BASE , (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3) )|
 				    	(GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_1) << 3));
 	g_ucChangedData = g_ul_keypad_switches ^ ul_pressed_data;

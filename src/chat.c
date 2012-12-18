@@ -83,8 +83,7 @@ void CHAT_inicializacion(){
 	CHAT_inicializacion_clock();
 	CHAT_inicializacion_keypad();
 	CHAT_inicializacion_display();
-	//TODO: quitar lo de abajo de comentarios
-	//CHAT_inicializacion_pwm();
+	CHAT_inicializacion_pwm();
 	CHAT_inicializacion_comunicacion();
 }
 
@@ -96,8 +95,9 @@ void CHAT_inicializacion(){
  * Primero se lee la tecla pulsada, luego se actualiza la pantalla teniendo
  * en cuenta la tecla pulsa, si se pulsa el select se envía el mensaje y se
  * reinicializa la parte de la pantalla en la que escribe el usuario.
+ * Si se ha reibido algo por la UART y está almacenado en el buffer de software
+ * se muestra en pantalla.
 */
-//TODO: falta explicar lo de recibir
 void CHAT_logica(){
 	CHAT_leer_keypad();
 	CHAT_logica_teclas();

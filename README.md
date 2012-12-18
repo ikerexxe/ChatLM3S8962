@@ -13,7 +13,8 @@
 	los últimos mensajes intercambiados. Al recibir un nuevo mensaje se reproduce un tono
 	de alerta.
 	El requisito principal del programa es que solo se pueden enviar y recibir mensajes
-	con una longitud igual o inferior a 10 caracteres.
+	con una longitud igual o inferior a 10 caracteres. A la hora de enviar no se muestran
+	los caracteres hasta haber recibido $, que se usa como caracter de fin de comunicación.
 	
 /****************************************************************************************/
 
