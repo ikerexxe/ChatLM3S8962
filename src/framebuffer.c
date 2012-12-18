@@ -203,7 +203,7 @@ void FRAME_BUFFER_write_to_display(void){
 		(g_display_elements[i].yOld != g_display_elements[i].y ))
 		{
 			if(g_display_elements[i].what==1){ //Es un texto
-					size = strlen(g_display_elements[i].picture_or_text);
+					size = MAX_ELEMS_PANTALLA + 4;
 					for(index = 0; index < size; index ++){
 						str[index]= ' ';
 					}

@@ -236,6 +236,7 @@ void CHAT_refrescar_conversacion(int tipo, unsigned char * mensaje){
 	} else{
 		contador = 1;
 		g_i_numero_elemento = FRAME_BUFFER_delete_element(contador);
+		FRAME_BUFFER_write_to_display();
 		for(contador; contador < g_i_numero_elemento; contador++){
 			FRAME_BUFFER_actualiza_posicion_elemento(contador, 0, altura);
 			altura += 10;
