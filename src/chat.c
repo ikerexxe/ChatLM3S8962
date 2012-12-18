@@ -83,6 +83,7 @@ void CHAT_inicializacion(){
 	CHAT_inicializacion_clock();
 	CHAT_inicializacion_keypad();
 	CHAT_inicializacion_display();
+	//TODO: quitar lo de abajo de comentarios
 	//CHAT_inicializacion_pwm();
 	CHAT_inicializacion_comunicacion();
 }
@@ -107,7 +108,7 @@ void CHAT_logica(){
 		g_b_enviar = false;
 	}
 
-	//CHAT_recibir();
+	CHAT_recibir();
 }
 /*********************************************************************
 ** 																	**

@@ -296,6 +296,8 @@ void Default_Reset_Handler(void)
   */
 static void Default_Handler(void) 
 {
+	FRAME_BUFFER_insert_text("HANDLER", 0, 65);
+	FRAME_BUFFER_write_to_display();
   /* Go into an infinite loop. */
   while (1) 
   {
