@@ -144,7 +144,9 @@ void closeUART(int nPort)
 */
 int recvUART(int nPort, unsigned char *p, int *pSize)
 {
-  int i,j,n;
+  int i; /*Contador que recorre el buffer de software*/
+  int j; /*Contador que recorre el buffer de hardware*/
+  int n; /*Numero de elementos en el buffer de hardware*/
 
   n=nElementosIn(nPort);
   *pSize=n;
@@ -167,7 +169,10 @@ int recvUART(int nPort, unsigned char *p, int *pSize)
 */
 int sendUART(int nPort, unsigned char *p, int *pSize)
 {
-  int i,j,n,retry;
+  int i; /*Contador que recorre el buffer de software*/
+  int j; /*Contador que recorre el buffer de hardware*/
+  int n; /*Numero de huecos en el buffer de hardware*/
+  int retry; /*Si se debe seguir rellenando el buffer de hardware*/
 
   n=nHuecosOut(nPort);
   if(n>*pSize) n=*pSize;
@@ -204,9 +209,8 @@ int sendUART(int nPort, unsigned char *p, int *pSize)
 */
 static void fromHwFIFO(int nPort)
 {
-  int n;
-  int i = 0;
-  unsigned int l;
+  int n; /*Numero de huecos en el buffer de hardware*/
+  unsigned int l; /*Variable temporal donde se guardan los caracteres recibidos*/
 
   n=nHuecosIn(nPort);
   while(UARTCharsAvail(uartsBases[nPort])&& (n-->0))
@@ -214,7 +218,6 @@ static void fromHwFIFO(int nPort)
     l=UARTCharGetNonBlocking(uartsBases[nPort]);
 	uarts[nPort].inBuf[uarts[nPort].inHead]=(unsigned char)l;
 	uarts[nPort].inHead++;
-	i++;
 	if(uarts[nPort].inHead==BUFF_SIZE) uarts[nPort].inHead=0;
   }
 }
@@ -229,8 +232,9 @@ static void fromHwFIFO(int nPort)
 */
 static int toHwFIFO(int nPort)
 {
-	unsigned char c;
-	int n,m;
+	unsigned char c; /*Variable temporal donde se guardan los caracteres a enviar*/
+	int n; /*Numero de huecos en el buffer de hardware*/
+	int m; /*Valor de retorno*/
 
 	n=nElementosOut(nPort);
 	m=0;
@@ -277,30 +281,13 @@ void  __attribute__((interrupt)) UART1IntHandler(void)
 */
 void UARTIntHandlerLogic(int nPort)
 {
-  unsigned long ulStatus;
-#if(BLOCKING_DRV==1)
-  static signed portBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
-#endif
+  unsigned long ulStatus; /*El estado de la interrupcion*/
 
   ulStatus = UARTIntStatus(uartsBases[nPort], true);
   if(ulStatus & (UART_INT_RX | UART_INT_RT ))
   {
     fromHwFIFO(nPort);
-#if(BLOCKING_DRV==1)
-    xSemaphoreGiveFromISR(uarts[nPort].charAvailabilitySignal, &xHigherPriorityTaskWoken);
-#endif
   }
-  /*
-  if(ulStatus & UART_INT_TX)
-  {
-	  if(uarts[nPort].outHead!=uarts[nPort].outTail)
-	  {
- 	    if (!uarts[nPort].writingToBuf) toHwFIFO(nPort);
- 	    else uarts[nPort].intWhileWriting=1;
-	  }
-	  UARTIntClear(uartsBases[nPort], UART_INT_TX);
-  }
-  */
   UARTIntClear(uartsBases[nPort], ulStatus);
 }
 

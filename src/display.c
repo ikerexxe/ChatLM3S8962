@@ -117,7 +117,7 @@ void CHAT_inicializacion_display(){
 	char *str;
 
 	FRAME_BUFFER_init();
-	str="----------(Final)";
+	str="----------";
 	FRAME_BUFFER_insert_text(str, 0, 75); //Escribimos en el buffer
 	CHAT_inicializacion_usuario(); //Inicializamos el texto del usuario y lo volvamos a la pantalla
 }

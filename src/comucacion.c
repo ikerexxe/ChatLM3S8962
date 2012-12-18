@@ -124,9 +124,8 @@ void CHAT_recibir(){
 			recibido = false;
 			//CHAT_reproducir_silencio();
 		}
-	} else{
-		free(temporal);
 	}
+	free(temporal);
 }
 
 /**
